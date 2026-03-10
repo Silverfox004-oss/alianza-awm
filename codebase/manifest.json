@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "drive_id": "6791a149-6b8d-480b-9cc5-be64f8cbfb80",
+  "name": "ai-workforce-map",
+  "description": "AI Workforce Map — Complete Next.js 15 app with Supabase, Inngest grading pipeline, and employer dashboard",
+  "tags": [
+    "nextjs",
+    "typescript",
+    "supabase",
+    "inngest",
+    "ai-assessment",
+    "dashboard",
+    "saas"
+  ],
+  "created_at": "2026-03-09T21:30:16.264837+00:00",
+  "updated_at": "2026-03-09T21:30:16.264837+00:00",
+  "parent_project": null,
+  "sessions": [
+    {
+      "session_id": "e79786de-9817-46ab-8ee3-73dc306ebaa7/subagents/extract_ai_workforce_map_codebase_20260309_211521",
+      "timestamp": "2026-03-09T21:30:16.264837+00:00",
+      "summary": "Completed all 63 production TypeScript files from 7 Notion spec pages. This session wrote 17 remaining files: risk-concentration-chart, export-csv-button, training page, 2 dashboard API routes, signup/login/setup/invite admin pages, 2 admin API routes, AuthGuard, package.json, tsconfig.json, .env.local.example, migration.sql (408 lines), and README.md (328 lines)."
+    }
+  ]
+}
