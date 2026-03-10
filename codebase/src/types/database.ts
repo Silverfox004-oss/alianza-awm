@@ -22,7 +22,8 @@ export interface Database {
           ai_adoption_goals: string[]
           risk_sensitivity: 'low' | 'medium' | 'high'
           target_functions: string[]
-          employee_count: number
+          expected_employee_count: number | null
+          created_by: string | null
           created_at: string
           updated_at: string
         }
@@ -33,9 +34,9 @@ export interface Database {
         Row: {
           id: string
           company_id: string
-          user_id: string
-          role: 'admin' | 'employee'
-          name: string
+          user_id: string | null
+          role: 'admin' | 'member' | 'employee'
+          name: string | null
           title: string | null
           department: string | null
           years_experience: number | null
@@ -54,19 +55,16 @@ export interface Database {
         Row: {
           id: string
           company_id: string
-          code: string
           slug: string
           department: string | null
           max_uses: number | null
-          uses_count: number
           use_count: number
           expires_at: string | null
           is_active: boolean
-          created_by: string
+          created_by: string | null
           created_at: string
           used_at: string | null
           assessment_id: string | null
-          completed_at: string | null
         }
         Insert: Omit<Database['public']['Tables']['assessment_links']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['assessment_links']['Insert']>
@@ -74,27 +72,36 @@ export interface Database {
       assessments: {
         Row: {
           id: string
-          company_user_id: string
           company_id: string | null
+          company_user_id: string | null
           link_id: string | null
+          employee_id: string | null
           status: string
           selected_scenario_ids: string[]
+          scenario_ids: string[]
           current_scenario_index: number
           started_at: string | null
-          paused_at: string | null
           completed_at: string | null
-          graded_at: string | null
+          paused_at: string | null
           elapsed_seconds: number | null
+          total_time_seconds: number | null
           overall_score: number | null
           readiness_band: string | null
           domain_scores: Json | null
-          top_strengths: string[] | null
-          development_areas: string[] | null
-          narrative_summary: string | null
-          development_recommendations: string[] | null
+          role_scores: Json | null
+          recommended_role: string | null
+          role_ranking: string[] | null
+          risk_flags: Json | null
+          training_track: string | null
+          deployment_recommendation: string | null
+          upskill_recommendations: string[] | null
+          executive_summary: string | null
+          graded_at: string | null
+          link_slug: string | null
           created_at: string
+          updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['assessments']['Row'], 'id' | 'created_at'>
+        Insert: Omit<Database['public']['Tables']['assessments']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['assessments']['Insert']>
       }
       assessment_responses: {
@@ -106,8 +113,9 @@ export interface Database {
           followup_exchanges: Json | null
           submitted_at: string | null
           updated_at: string
+          created_at: string
         }
-        Insert: Omit<Database['public']['Tables']['assessment_responses']['Row'], 'id'>
+        Insert: Omit<Database['public']['Tables']['assessment_responses']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['assessment_responses']['Insert']>
       }
       assessment_evaluations: {
@@ -115,11 +123,13 @@ export interface Database {
           id: string
           assessment_id: string
           scenario_id: string
-          prompt_comprehension: number | null
-          ai_collaboration: number | null
-          critical_evaluation: number | null
-          ethics_and_bias: number | null
-          practical_application: number | null
+          task_framing: number | null
+          process_thinking: number | null
+          verification_instinct: number | null
+          exception_handling: number | null
+          risk_judgment: number | null
+          operational_consistency: number | null
+          change_leverage: number | null
           missed_penalty_applied: boolean
           primary_grade: Json | null
           skeptic_grade: Json | null
@@ -132,9 +142,10 @@ export interface Database {
         Row: {
           id: string
           assessment_id: string
-          role_title: string
+          role_key: string
           fit_score: number
-          rationale: string | null
+          rank: number
+          is_recommended: boolean
           created_at: string
         }
         Insert: Omit<Database['public']['Tables']['role_fit_results']['Row'], 'id' | 'created_at'>
@@ -143,34 +154,80 @@ export interface Database {
       scenarios: {
         Row: {
           id: string
+          slug: string
           title: string
-          module_label: string | null
-          context: string | null
-          task: string
-          time_limit_seconds: number | null
+          archetype: string
+          module: string
+          difficulty: 'obvious' | 'mixed' | 'deceptive'
+          primary_domains: string[]
+          secondary_domains: string[]
+          target_roles: string[]
+          industry: string | null
+          scenario_text: string
+          status: 'draft' | 'published' | 'archived'
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['scenarios']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['scenarios']['Insert']>
+      }
+      roles: {
+        Row: {
+          id: string
+          name: string
+          label: string
+          description: string | null
+          domain_weights: Json
           created_at: string
         }
-        Insert: Omit<Database['public']['Tables']['scenarios']['Row'], 'id' | 'created_at'>
-        Update: Partial<Database['public']['Tables']['scenarios']['Insert']>
+        Insert: Omit<Database['public']['Tables']['roles']['Row'], 'id' | 'created_at'>
+        Update: Partial<Database['public']['Tables']['roles']['Insert']>
       }
       evaluations: {
         Row: {
           id: string
           assessment_id: string | null
           company_id: string | null
-          status: 'grading' | 'complete' | 'error'
+          employee_name: string | null
+          department: string | null
           readiness_band: string | null
           readiness_score: number | null
+          domain_scores: Json
+          risk_flags: Json
           training_track: string | null
-          domain_scores: Json | null
-          risk_flags: Json | null
-          upskill_recommendations: Json | null
-          department: string | null
-          employee_name: string | null
+          deployment_recommendation: string | null
+          upskill_recommendations: string[] | null
+          executive_summary: string | null
+          status: 'complete' | 'failed'
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['evaluations']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['evaluations']['Insert']>
+      }
+      responses: {
+        Row: {
+          id: string
+          assessment_id: string
+          scenario_id: string
+          raw_response: string
+          followup_questions: Json
+          time_spent_seconds: number
           created_at: string
         }
-        Insert: Omit<Database['public']['Tables']['evaluations']['Row'], 'id' | 'created_at'>
-        Update: Partial<Database['public']['Tables']['evaluations']['Insert']>
+        Insert: Omit<Database['public']['Tables']['responses']['Row'], 'id' | 'created_at'>
+        Update: Partial<Database['public']['Tables']['responses']['Insert']>
+      }
+      rubrics: {
+        Row: {
+          id: string
+          scenario_id: string
+          domain: string
+          rubric_text: string
+          created_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['rubrics']['Row'], 'id' | 'created_at'>
+        Update: Partial<Database['public']['Tables']['rubrics']['Insert']>
       }
     }
     Views: Record<string, never>

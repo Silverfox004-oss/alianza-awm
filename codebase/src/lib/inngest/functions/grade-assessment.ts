@@ -1,5 +1,5 @@
 import { inngest } from "../client";
-import { createServerSupabaseClient as createServerClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { runPrimaryGrader } from "@/lib/llm/primary-grader";
 import { runSkepticGrader } from "@/lib/llm/skeptic-grader";
 import { runSynthesizer } from "@/lib/llm/synthesizer";
@@ -22,14 +22,14 @@ export const gradeAssessment = inngest.createFunction(
 
     // ─── Step 1: Load all responses + scenario metadata ─────────────────────
     const assessmentData = await step.run("load-assessment-data", async () => {
-      const supabase = await createServerClient();
+      const supabase = createAdminClient();
 
       const { data: assessment, error: assessError } = await supabase
         .from("assessments")
         .select(`
           id, selected_scenario_ids,
-          company_users(id, name, department, is_manager, ai_exposure, years_experience),
-          companies(id, name)
+          company_users!company_user_id(id, name, department, is_manager, ai_exposure, years_experience),
+          companies!company_id(id, name)
         `)
         .eq("id", assessmentId)
         .single();
@@ -152,7 +152,7 @@ export const gradeAssessment = inngest.createFunction(
 
     // ─── Step 6: Persist Results ─────────────────────────────────────────────
     await step.run("persist-results", async () => {
-      const supabase = await createServerClient();
+      const supabase = createAdminClient();
 
       // Per-scenario evaluation rows (7-domain scores)
       const evaluationRows = reconciledEvaluations.map((e: any) => ({
@@ -179,7 +179,6 @@ export const gradeAssessment = inngest.createFunction(
       const roleFitRows = synthesis.role_ranking.map((role, index) => ({
         assessment_id: assessmentId,
         role_key: role,
-        role_title: (synthesis as any).role_scores ? role : role,
         fit_score: synthesis.role_scores[role],
         rank: index + 1,
         is_recommended: role === synthesis.recommended_role,

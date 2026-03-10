@@ -44,6 +44,14 @@ const MODULE_LABELS: Record<number, string> = {
 };
 
 /**
+ * Normalize domain keys from hyphenated (frontmatter) to underscored (code).
+ * e.g. "risk-judgment" → "risk_judgment", "process-thinking" → "process_thinking"
+ */
+function normalizeDomainKey(key: string): string {
+  return key.replace(/-/g, "_");
+}
+
+/**
  * Find a scenario .md file by its ID (e.g. "SCN-001").
  * Searches base/ then variants/ directories for any file starting with the ID.
  */
@@ -78,8 +86,8 @@ export async function loadScenarioFile(scenarioId: string): Promise<ScenarioFile
       module: moduleNum,
       difficulty: data.difficulty ?? 3,
       industry: data.industry ?? "",
-      primaryDomains: data.primary_domains ?? [],
-      secondaryDomains: data.secondary_domains ?? [],
+      primaryDomains: (data.primary_domains ?? []).map(normalizeDomainKey),
+      secondaryDomains: (data.secondary_domains ?? []).map(normalizeDomainKey),
       targetRoles: data.target_roles ?? [],
       situation: extractSection(content, "Situation"),
       challenge: extractSection(content, "The Challenge"),
@@ -136,7 +144,7 @@ export async function listAvailableScenarios(): Promise<Array<{
           module: data.module,
           difficulty: data.difficulty,
           industry: data.industry,
-          primaryDomains: data.primary_domains ?? [],
+          primaryDomains: (data.primary_domains ?? []).map(normalizeDomainKey),
           targetRoles: data.target_roles ?? [],
         });
       }

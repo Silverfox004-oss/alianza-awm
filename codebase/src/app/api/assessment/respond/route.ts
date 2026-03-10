@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { streamText } from "ai";
-import { openai } from "@ai-sdk/openai";
 import { createServerSupabaseClient as createServerClient } from "@/lib/supabase/server";
+import { loadScenarioFile } from "@/lib/utils/scenario-loader";
+import { runExaminer } from "@/lib/llm/examiner";
 import { dispatchGrading } from "@/lib/inngest/dispatch";
 
 export const maxDuration = 60;
@@ -37,21 +37,15 @@ export async function POST(req: Request) {
 
   // Follow-up chat stream (messages array present)
   if (messages && Array.isArray(messages)) {
-    const { data: scenario } = await supabase
-      .from("scenarios")
-      .select("title, context, task")
-      .eq("id", scenarioId)
-      .single();
+    // Load scenario from file (not DB) — scenarios are markdown-based
+    const scenario = await loadScenarioFile(scenarioId);
 
-    const result = await streamText({
-      model: openai("gpt-4o-mini"),
-      system: `You are an AI assessment examiner. The employee is completing a scenario-based AI readiness assessment.
-Scenario: "${scenario?.title}"
-Context: ${scenario?.context}
-Task: ${scenario?.task}
-
-Ask ONE clear, probing follow-up question about their reasoning, edge cases, or failure modes. Be direct and concise.`,
-      messages,
+    const result = await runExaminer({
+      scenarioTitle: scenario?.title ?? "Unknown Scenario",
+      scenarioContext: scenario?.context ?? "",
+      scenarioTask: scenario?.task ?? "",
+      userResponse: responseText ?? "",
+      conversationHistory: messages,
     });
 
     // Persist exchange asynchronously

@@ -17,7 +17,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { linkCode, name, title, department, yearsExperience,
+    const { linkSlug, name, title, department, yearsExperience,
       isManager, toolUsage, priorAiExposure,
       confidenceWithAmbiguity, comfortReviewingWork } = parsed.data;
 
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     const { data: link, error: linkError } = await supabase
       .from("assessment_links")
       .select("id, company_id, expires_at, used_at")
-      .eq("code", linkCode)
+      .eq("slug", linkSlug)
       .single();
 
     if (linkError || !link) {
@@ -40,10 +40,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Link expired" }, { status: 410 });
     }
 
-    // 3. Upsert company_user record
+    // 3. Insert company_user record (anonymous — user_id is null)
     const { data: companyUser, error: userError } = await supabase
       .from("company_users")
-      .upsert(
+      .insert(
         {
           company_id: link.company_id,
           name, title, department,
@@ -53,16 +53,15 @@ export async function POST(req: Request) {
           ai_exposure: priorAiExposure.toLowerCase() as any,
           ambiguity_confidence: confidenceWithAmbiguity,
           review_comfort: comfortReviewingWork,
-          user_id: crypto.randomUUID(), // anonymous employee
+          user_id: null, // anonymous employee — no auth account needed
           role: 'employee',
         },
-        { onConflict: "company_id,user_id" }
       )
       .select("id")
       .single();
 
     if (userError || !companyUser) {
-      console.error("company_users upsert error:", userError);
+      console.error("company_users insert error:", userError);
       return NextResponse.json({ error: "Failed to create user record" }, { status: 500 });
     }
 

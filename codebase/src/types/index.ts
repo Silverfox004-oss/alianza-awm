@@ -6,7 +6,7 @@ export type ReadinessBand = 'not_ready' | 'emerging' | 'capable' | 'strong' | 'h
 
 export type RoleName = 'ai_operator' | 'ai_approver' | 'workflow_translator' | 'ai_qa_reviewer' | 'change_champion'
 
-export type DomainName = 
+export type DomainName =
   | 'task_framing'
   | 'process_thinking'
   | 'verification_instinct'
@@ -17,7 +17,7 @@ export type DomainName =
 
 export type TrainingTrack = 'A' | 'B' | 'C' | 'D'
 
-export type AssessmentStatus = 'not_started' | 'in_progress' | 'completed' | 'grading' | 'graded'
+export type AssessmentStatus = 'not_started' | 'in_progress' | 'paused' | 'grading' | 'complete' | 'failed'
 
 export type Difficulty = 'obvious' | 'mixed' | 'deceptive'
 
@@ -39,8 +39,8 @@ export interface Company {
 export interface CompanyUser {
   id: string
   company_id: string
-  user_id: string
-  role: 'admin' | 'employee'
+  user_id: string | null
+  role: 'admin' | 'member' | 'employee'
   name: string
   title?: string
   department?: string
@@ -59,14 +59,29 @@ export interface CompanyUser {
 
 export interface Assessment {
   id: string
-  employee_id: string
   company_id: string
+  company_user_id: string | null
+  link_id: string | null
+  employee_id?: string
   status: AssessmentStatus
-  scenario_ids: string[]
+  selected_scenario_ids: string[]
   current_scenario_index: number
   started_at?: string
   completed_at?: string
-  total_time_seconds?: number
+  paused_at?: string
+  elapsed_seconds?: number
+  overall_score?: number
+  readiness_band?: string
+  domain_scores?: Record<DomainName, number>
+  role_scores?: Record<RoleName, number>
+  recommended_role?: RoleName
+  role_ranking?: RoleName[]
+  risk_flags?: RiskFlag[]
+  training_track?: TrainingTrack
+  deployment_recommendation?: string
+  upskill_recommendations?: string[]
+  executive_summary?: string
+  graded_at?: string
   created_at: string
 }
 
@@ -110,27 +125,23 @@ export interface FollowUpExchange {
 }
 
 // ============================================
-// Evaluation (Grading Output)
+// Assessment Evaluation (7-domain grading output)
 // ============================================
 
-export interface Evaluation {
+export interface AssessmentEvaluation {
   id: string
-  response_id: string
-  domain: DomainName
-  primary_score: number        // 0-4
-  skeptic_score: number        // 0-4
-  final_score: number          // 0-4 (reconciled)
-  primary_reasoning: string
-  skeptic_reasoning: string
-  evidence_quotes: string[]
-  penalty_flags: PenaltyFlag[]
-  readiness_band?: ReadinessBand
-  readiness_score?: number
-  training_track?: TrainingTrack
-  domain_scores?: Record<DomainName, number>
-  risk_flags?: RiskFlag[]
-  upskill_recommendations?: string[]
-  status?: 'grading' | 'complete' | 'error'
+  assessment_id: string
+  scenario_id: string
+  task_framing: number          // 0-4
+  process_thinking: number      // 0-4
+  verification_instinct: number // 0-4
+  exception_handling: number    // 0-4
+  risk_judgment: number         // 0-4
+  operational_consistency: number // 0-4
+  change_leverage: number       // 0-4
+  missed_penalty_applied: boolean
+  primary_grade: any
+  skeptic_grade: any
   created_at: string
 }
 
@@ -147,20 +158,10 @@ export interface PenaltyFlag {
 export interface RoleFitResult {
   id: string
   assessment_id: string
-  employee_id: string
-  role: RoleName
-  score: number              // 0-100
-  rationale?: string
-  readiness_band: ReadinessBand
-  readiness_score: number       // 0-100
-  domain_scores: Record<DomainName, number>  // 0-100 each
-  role_scores: Record<RoleName, number>      // 0-100 each
-  recommended_role: RoleName
-  role_ranking: RoleName[]      // ordered best to worst
-  risk_flags: RiskFlag[]
-  training_track: TrainingTrack
-  deployment_recommendation: string
-  upskill_recommendations: string[]
+  role_key: string
+  fit_score: number           // 0-100
+  rank: number
+  is_recommended: boolean
   created_at: string
 }
 
@@ -233,7 +234,7 @@ export interface SkepticGraderOutput {
 
 export interface SynthesizerInput {
   employee: Pick<CompanyUser, 'name' | 'title' | 'department' | 'is_manager'>
-  reconciled_evaluations: Evaluation[]
+  reconciled_evaluations: AssessmentEvaluation[]
   role_definitions: Array<{ role: RoleName; domain_weights: Record<DomainName, number> }>
 }
 

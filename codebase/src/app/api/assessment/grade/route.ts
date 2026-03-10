@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 
   if (!assessment) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  if (!["completed", "grading"].includes(assessment.status)) {
+  if (!["complete", "grading"].includes(assessment.status)) {
     return NextResponse.json(
       { error: "Assessment is not ready for grading" }, { status: 409 }
     );

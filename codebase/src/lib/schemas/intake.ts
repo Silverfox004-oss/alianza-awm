@@ -35,9 +35,9 @@ export const IntakeFormSchema = z.object({
 
 export type IntakeFormData = z.infer<typeof IntakeFormSchema>;
 
-// API request schema — includes the link code
+// API request schema — includes the link slug
 export const StartAssessmentRequestSchema = IntakeFormSchema.extend({
-  linkCode: z.string().min(1, "Assessment link code is required"),
+  linkSlug: z.string().min(1, "Assessment link slug is required"),
 });
 
 export type StartAssessmentRequest = z.infer<typeof StartAssessmentRequestSchema>;
