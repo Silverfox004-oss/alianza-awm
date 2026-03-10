@@ -3,14 +3,14 @@ import { createServerSupabaseClient as createServerClient } from "@/lib/supabase
 import IntakeForm from "@/components/assessment/intake-form";
 
 interface IntakePageProps {
-  searchParams: Promise<{ code?: string }>;
+  searchParams: Promise<{ slug?: string }>;
 }
 
 export default async function IntakePage({ searchParams }: IntakePageProps) {
-  const { code } = await searchParams;
+  const { slug } = await searchParams;
 
-  // Require a link code in the URL
-  if (!code) {
+  // Require a link slug in the URL
+  if (!slug) {
     notFound();
   }
 
@@ -20,7 +20,7 @@ export default async function IntakePage({ searchParams }: IntakePageProps) {
   const { data: link, error } = await supabase
     .from("assessment_links")
     .select("id, company_id, expires_at, used_at, companies(name, departments)")
-    .eq("code", code)
+    .eq("slug", slug)
     .single();
 
   if (error || !link) {
@@ -73,7 +73,7 @@ export default async function IntakePage({ searchParams }: IntakePageProps) {
           </p>
         </div>
         <IntakeForm
-          linkCode={code}
+          linkSlug={slug}
           companyId={link.company_id}
           departments={departments}
         />

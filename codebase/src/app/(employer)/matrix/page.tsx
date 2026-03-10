@@ -8,20 +8,20 @@ export default async function MatrixPage() {
   const { data: companyUser } = await supabase
     .from('company_users').select('company_id').eq('user_id', user!.id).single()
 
-  // Get all employees with all 5 role scores
+  // Get all role fit results joined to assessments and company_users for employee name
   const { data: roleFits } = await supabase
     .from('role_fit_results')
-    .select('role, score, evaluation_id, evaluations!inner(id, employee_name, company_id)')
-    .eq('evaluations.company_id', companyUser?.company_id)
+    .select('role_key, fit_score, assessment_id, assessments!inner(id, company_id, company_users!company_user_id(name))')
+    .eq('assessments.company_id', companyUser?.company_id)
 
-  // Build Nivo heatmap data: array of { id: employeeId, data: [{ x: role, y: score }] }
+  // Build Nivo heatmap data: array of { id: employeeName, data: [{ x: role, y: score }] }
   const grouped: Record<string, any> = {}
   for (const rf of roleFits ?? []) {
-    const evalData = rf.evaluations as any
-    const empId = evalData.id
-    const name  = evalData.employee_name ?? empId.slice(0, 8)
+    const assessData = rf.assessments as any
+    const empId = assessData.id
+    const name  = assessData.company_users?.name ?? empId.slice(0, 8)
     if (!grouped[empId]) grouped[empId] = { id: name, data: [] }
-    grouped[empId].data.push({ x: (rf.role as string).replace('_', ' '), y: rf.score })
+    grouped[empId].data.push({ x: (rf.role_key as string).replace('_', ' '), y: rf.fit_score })
   }
   const heatmapData = Object.values(grouped)
 

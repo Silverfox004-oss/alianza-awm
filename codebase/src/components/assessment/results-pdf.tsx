@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import {
   Document, Page, Text, View, StyleSheet, PDFDownloadLink,
 } from '@react-pdf/renderer'
-import type { Evaluation, RoleFitResult } from '@/types'
+import type { Assessment, RoleFitResult } from '@/types'
 
 const styles = StyleSheet.create({
   page:         { padding: 40, fontFamily: 'Helvetica', backgroundColor: '#fff' },
@@ -32,16 +32,16 @@ const ROLE_LABELS: Record<string, string> = {
 }
 
 function ResultsDocument({
-  evaluation,
+  assessment,
   roleFitResults,
   domainScores,
 }: {
-  evaluation: Evaluation
+  assessment: Assessment
   roleFitResults: RoleFitResult[]
   domainScores: Array<{ domain: string; score: number }>
 }) {
-  const riskFlags: Array<{ flag: string; severity: string }> = (evaluation.risk_flags as any) ?? []
-  const track = evaluation.training_track as string
+  const riskFlags: Array<{ flag: string; severity: string }> = (assessment.risk_flags as any) ?? []
+  const track = assessment.training_track as string
 
   return (
     <Document>
@@ -56,11 +56,11 @@ function ResultsDocument({
           <Text style={styles.heading}>Readiness Overview</Text>
           <View style={styles.row}>
             <Text style={styles.label}>Readiness Band</Text>
-            <Text style={styles.badge}>{evaluation.readiness_band?.replace('_', ' ').toUpperCase()}</Text>
+            <Text style={styles.badge}>{assessment.readiness_band?.replace('_', ' ').toUpperCase()}</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.label}>Overall Score</Text>
-            <Text style={styles.value}>{evaluation.readiness_score} / 100</Text>
+            <Text style={styles.value}>{assessment.overall_score} / 100</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.label}>Training Track</Text>
@@ -72,9 +72,9 @@ function ResultsDocument({
         <View style={styles.section}>
           <Text style={styles.heading}>Top Role Fits</Text>
           {roleFitResults.slice(0, 3).map((r, i) => (
-            <View key={r.role} style={styles.row}>
-              <Text style={styles.label}>#{i + 1} {ROLE_LABELS[r.role] ?? r.role}</Text>
-              <Text style={styles.value}>{r.score}</Text>
+            <View key={r.role_key} style={styles.row}>
+              <Text style={styles.label}>#{i + 1} {ROLE_LABELS[r.role_key] ?? r.role_key}</Text>
+              <Text style={styles.value}>{r.fit_score}</Text>
             </View>
           ))}
         </View>
@@ -112,18 +112,18 @@ function ResultsDocument({
 }
 
 export function ResultsPDFDownload({
-  evaluation,
+  assessment,
   roleFitResults,
   domainScores,
 }: {
-  evaluation: Evaluation
+  assessment: Assessment
   roleFitResults: RoleFitResult[]
   domainScores: Array<{ domain: string; score: number }>
 }) {
   return (
     <PDFDownloadLink
-      document={<ResultsDocument evaluation={evaluation} roleFitResults={roleFitResults} domainScores={domainScores} />}
-      fileName={`ai-readiness-results-${evaluation.id}.pdf`}
+      document={<ResultsDocument assessment={assessment} roleFitResults={roleFitResults} domainScores={domainScores} />}
+      fileName={`ai-readiness-results-${assessment.id}.pdf`}
     >
       {({ loading }) => (
         <Button variant="outline" disabled={loading}>

@@ -6,9 +6,9 @@ import { createClient as createBrowserClient } from '@/lib/supabase/client'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Progress } from '@/components/ui/progress'
 
-interface Props { evaluationId: string }
+interface Props { assessmentId: string }
 
-export function GradingInProgress({ evaluationId }: Props) {
+export function GradingInProgress({ assessmentId }: Props) {
   const router = useRouter()
   const supabase = createBrowserClient()
   const [progress, setProgress] = useState(10)
@@ -21,23 +21,23 @@ export function GradingInProgress({ evaluationId }: Props) {
     return () => clearInterval(timer)
   }, [])
 
-  // Poll Supabase Realtime for status change
+  // Poll Supabase Realtime for status change on assessments table
   useEffect(() => {
     const channel = supabase
-      .channel(`evaluation-${evaluationId}`)
+      .channel(`assessment-${assessmentId}`)
       .on(
         'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'evaluations', filter: `id=eq.${evaluationId}` },
+        { event: 'UPDATE', schema: 'public', table: 'assessments', filter: `id=eq.${assessmentId}` },
         (payload) => {
           if ((payload.new as any).status === 'complete') {
-            router.push(`/results?evaluation_id=${evaluationId}`)
+            router.push(`/results?id=${assessmentId}`)
           }
         }
       )
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [evaluationId, router, supabase])
+  }, [assessmentId, router, supabase])
 
   return (
     <div className="max-w-2xl mx-auto py-20 px-4 text-center space-y-6">

@@ -43,16 +43,17 @@ export default async function TrainingPage() {
   const { data: companyUser } = await supabase
     .from('company_users').select('company_id').eq('user_id', user!.id).single()
 
-  const { data: evaluations } = await supabase
-    .from('evaluations')
-    .select('id, employee_name, department, training_track, readiness_score')
+  const { data: assessments } = await supabase
+    .from('assessments')
+    .select('id, training_track, overall_score, company_users!company_user_id(name, department)')
     .eq('company_id', companyUser?.company_id)
     .eq('status', 'complete')
 
   const byTrack: Record<string, any[]> = { A: [], B: [], C: [], D: [] }
-  for (const e of evaluations ?? []) {
+  for (const e of assessments ?? []) {
+    const cu = e.company_users as any
     const t = e.training_track as string
-    if (byTrack[t]) byTrack[t].push(e)
+    if (byTrack[t]) byTrack[t].push({ ...e, employee_name: cu?.name ?? null, department: cu?.department ?? null })
   }
 
   return (

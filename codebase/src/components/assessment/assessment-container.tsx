@@ -95,11 +95,6 @@ export default function AssessmentContainer({ assessment, scenarios, existingRes
       router.push(`/complete?id=${assessment.id}`);
       return;
     }
-    await fetch("/api/assessment/progress", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ assessmentId: assessment.id, currentScenarioIndex: nextIndex }),
-    });
     setCurrentIndex(nextIndex);
     setResponseText(
       existingResponses.find((r) => r.scenario_id === scenarios[nextIndex]?.id)?.response_text ?? ""

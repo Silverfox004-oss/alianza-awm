@@ -22,12 +22,12 @@ import {
 } from "@/lib/schemas/intake";
 
 interface IntakeFormProps {
-  linkCode: string;
+  linkSlug: string;
   companyId: string;
   departments: string[];
 }
 
-export default function IntakeForm({ linkCode, companyId, departments }: IntakeFormProps) {
+export default function IntakeForm({ linkSlug, companyId, departments }: IntakeFormProps) {
   const router = useRouter();
 
   const form = useForm<IntakeFormData>({
@@ -52,7 +52,7 @@ export default function IntakeForm({ linkCode, companyId, departments }: IntakeF
       const res = await fetch("/api/assessment/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, linkCode }),
+        body: JSON.stringify({ ...data, linkSlug }),
       });
       if (!res.ok) {
         const err = await res.json();

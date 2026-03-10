@@ -8,9 +8,9 @@ export default async function RiskPage() {
   const { data: companyUser } = await supabase
     .from('company_users').select('company_id').eq('user_id', user!.id).single()
 
-  const { data: evaluations } = await supabase
-    .from('evaluations')
-    .select('id, employee_name, department, risk_flags')
+  const { data: assessments } = await supabase
+    .from('assessments')
+    .select('id, risk_flags, company_users!company_user_id(name, department)')
     .eq('company_id', companyUser?.company_id)
     .eq('status', 'complete')
 
@@ -19,8 +19,10 @@ export default async function RiskPage() {
   const flagFrequency: Record<string, number> = {}
   const highRiskEmployees: any[] = []
 
-  for (const e of evaluations ?? []) {
-    const dept = e.department ?? 'Unknown'
+  for (const e of assessments ?? []) {
+    const cu = e.company_users as any
+    const dept = cu?.department ?? 'Unknown'
+    const employeeName = cu?.name ?? e.id.slice(0, 8)
     if (!deptMap[dept]) deptMap[dept] = { dept, low: 0, medium: 0, high: 0 }
     const flags = (e.risk_flags as any[]) ?? []
     for (const f of flags) {
@@ -29,7 +31,7 @@ export default async function RiskPage() {
     }
     const highCount = flags.filter(f => f.severity === 'high').length
     if (highCount >= 2) {
-      highRiskEmployees.push({ ...e, highFlagCount: highCount })
+      highRiskEmployees.push({ id: e.id, employee_name: employeeName, highFlagCount: highCount })
     }
   }
 
@@ -63,7 +65,7 @@ export default async function RiskPage() {
             <div className="space-y-2">
               {highRiskEmployees.map((e) => (
                 <div key={e.id} className="flex justify-between text-sm py-1 border-b border-gray-100">
-                  <span className="text-gray-700">{e.employee_name ?? e.id.slice(0, 8)}</span>
+                  <span className="text-gray-700">{e.employee_name}</span>
                   <span className="text-red-500">{e.highFlagCount} high flags</span>
                 </div>
               ))}

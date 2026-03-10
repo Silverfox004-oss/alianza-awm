@@ -1,13 +1,11 @@
 'use client'
 
-import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { AlertTriangle, Download, Star, TrendingUp } from 'lucide-react'
+import { AlertTriangle, Star, TrendingUp } from 'lucide-react'
 import { DomainRadarChart } from '@/components/charts/domain-radar-chart'
 import { ResultsPDFDownload } from '@/components/assessment/results-pdf'
-import type { Evaluation, RoleFitResult, ReadinessBand } from '@/types'
+import type { Assessment, RoleFitResult, ReadinessBand } from '@/types'
 
 // ── Readiness band config ──────────────────────────────────────────────────
 const BAND_CONFIG: Record<ReadinessBand, { label: string; color: string; bg: string }> = {
@@ -60,30 +58,30 @@ const TRACK_CONFIG = {
 }
 
 interface Props {
-  evaluation: Evaluation
+  assessment: Assessment
   roleFitResults: RoleFitResult[]
 }
 
-export function ResultsDashboard({ evaluation, roleFitResults }: Props) {
-  const band = evaluation.readiness_band as ReadinessBand
+export function ResultsDashboard({ assessment, roleFitResults }: Props) {
+  const band = assessment.readiness_band as ReadinessBand
   const bandConfig = BAND_CONFIG[band]
-  const track = evaluation.training_track as 'A' | 'B' | 'C' | 'D'
+  const track = assessment.training_track as 'A' | 'B' | 'C' | 'D'
   const trackConfig = TRACK_CONFIG[track]
   const top3Roles = roleFitResults.slice(0, 3)
 
   // Build domain scores array for radar chart
   const domainScores = [
-    { domain: 'Task Framing',           score: (evaluation.domain_scores as any)?.task_framing ?? 0 },
-    { domain: 'Process Thinking',       score: (evaluation.domain_scores as any)?.process_thinking ?? 0 },
-    { domain: 'Verification Instinct',  score: (evaluation.domain_scores as any)?.verification_instinct ?? 0 },
-    { domain: 'Exception Handling',     score: (evaluation.domain_scores as any)?.exception_handling ?? 0 },
-    { domain: 'Risk Judgment',          score: (evaluation.domain_scores as any)?.risk_judgment ?? 0 },
-    { domain: 'Operational Consistency',score: (evaluation.domain_scores as any)?.operational_consistency ?? 0 },
-    { domain: 'Change Leverage',        score: (evaluation.domain_scores as any)?.change_leverage ?? 0 },
+    { domain: 'Task Framing',           score: (assessment.domain_scores as any)?.task_framing ?? 0 },
+    { domain: 'Process Thinking',       score: (assessment.domain_scores as any)?.process_thinking ?? 0 },
+    { domain: 'Verification Instinct',  score: (assessment.domain_scores as any)?.verification_instinct ?? 0 },
+    { domain: 'Exception Handling',     score: (assessment.domain_scores as any)?.exception_handling ?? 0 },
+    { domain: 'Risk Judgment',          score: (assessment.domain_scores as any)?.risk_judgment ?? 0 },
+    { domain: 'Operational Consistency',score: (assessment.domain_scores as any)?.operational_consistency ?? 0 },
+    { domain: 'Change Leverage',        score: (assessment.domain_scores as any)?.change_leverage ?? 0 },
   ]
 
   const riskFlags: Array<{ flag: string; severity: 'low' | 'medium' | 'high' }> =
-    (evaluation.risk_flags as any) ?? []
+    (assessment.risk_flags as any) ?? []
 
   return (
     <div className="max-w-4xl mx-auto py-10 px-4 space-y-8">
@@ -93,7 +91,7 @@ export function ResultsDashboard({ evaluation, roleFitResults }: Props) {
           <h1 className="text-3xl font-bold text-gray-900">Your AI Readiness Results</h1>
           <p className="text-gray-500 mt-1">Assessment completed — here's what we found.</p>
         </div>
-        <ResultsPDFDownload evaluation={evaluation} roleFitResults={roleFitResults} domainScores={domainScores} />
+        <ResultsPDFDownload assessment={assessment} roleFitResults={roleFitResults} domainScores={domainScores} />
       </div>
 
       {/* Readiness Band Badge */}
@@ -105,7 +103,7 @@ export function ResultsDashboard({ evaluation, roleFitResults }: Props) {
             </span>
             <div>
               <p className="text-sm text-gray-500">Overall Readiness Score</p>
-              <p className="text-5xl font-bold text-gray-900">{evaluation.readiness_score}<span className="text-xl text-gray-400">/100</span></p>
+              <p className="text-5xl font-bold text-gray-900">{assessment.overall_score}<span className="text-xl text-gray-400">/100</span></p>
             </div>
           </div>
         </CardContent>
@@ -118,16 +116,16 @@ export function ResultsDashboard({ evaluation, roleFitResults }: Props) {
         </CardHeader>
         <CardContent className="space-y-3">
           {top3Roles.map((r, i) => (
-            <div key={r.role} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+            <div key={r.role_key} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
               <div className="flex items-center gap-3">
                 <span className="text-lg font-bold text-gray-400">#{i + 1}</span>
-                <span className="font-semibold text-gray-800">{ROLE_LABELS[r.role] ?? r.role}</span>
+                <span className="font-semibold text-gray-800">{ROLE_LABELS[r.role_key] ?? r.role_key}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div className="h-full bg-blue-500 rounded-full" style={{ width: `${r.score}%` }} />
+                  <div className="h-full bg-blue-500 rounded-full" style={{ width: `${r.fit_score}%` }} />
                 </div>
-                <span className="text-sm font-medium text-gray-600 w-10 text-right">{r.score}</span>
+                <span className="text-sm font-medium text-gray-600 w-10 text-right">{r.fit_score}</span>
               </div>
             </div>
           ))}
@@ -197,14 +195,14 @@ export function ResultsDashboard({ evaluation, roleFitResults }: Props) {
       </Card>
 
       {/* Upskill Recommendations */}
-      {evaluation.upskill_recommendations && (evaluation.upskill_recommendations as any[]).length > 0 && (
+      {assessment.upskill_recommendations && (assessment.upskill_recommendations as any[]).length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Upskill Recommendations</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
-              {(evaluation.upskill_recommendations as string[]).map((rec, i) => (
+              {(assessment.upskill_recommendations as string[]).map((rec, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-gray-700 p-2 rounded bg-blue-50">
                   <span className="text-blue-500 font-bold">{i + 1}.</span> {rec}
                 </li>

@@ -8,24 +8,29 @@ export default async function RankingPage() {
   const { data: companyUser } = await supabase
     .from('company_users').select('company_id').eq('user_id', user!.id).single()
 
-  const { data: evaluations } = await supabase
-    .from('evaluations')
+  const { data: assessments } = await supabase
+    .from('assessments')
     .select(`
-      id, created_at, readiness_band, readiness_score, training_track,
-      department, risk_flags,
-      role_fit_results ( role, score )
+      id, created_at, readiness_band, overall_score, training_track,
+      risk_flags,
+      company_users!company_user_id(name, department),
+      role_fit_results ( role_key, fit_score )
     `)
     .eq('company_id', companyUser?.company_id)
     .eq('status', 'complete')
-    .order('readiness_score', { ascending: false })
+    .order('overall_score', { ascending: false })
 
   // Flatten: add best-fit role and risk level
-  const rows = (evaluations ?? []).map(e => {
-    const sorted = (e.role_fit_results as any[])?.sort((a: any, b: any) => b.score - a.score) ?? []
+  const rows = (assessments ?? []).map(e => {
+    const sorted = (e.role_fit_results as any[])?.sort((a: any, b: any) => b.fit_score - a.fit_score) ?? []
     const highRiskCount = (e.risk_flags as any[])?.filter((f: any) => f.severity === 'high').length ?? 0
+    const cu = e.company_users as any
     return {
       ...e,
-      best_fit_role: sorted[0]?.role ?? 'N/A',
+      employee_name: cu?.name ?? null,
+      department: cu?.department ?? null,
+      readiness_score: e.overall_score,
+      best_fit_role: sorted[0]?.role_key ?? 'N/A',
       risk_level: highRiskCount >= 2 ? 'High' : highRiskCount === 1 ? 'Medium' : 'Low',
     }
   })

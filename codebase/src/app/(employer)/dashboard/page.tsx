@@ -17,22 +17,22 @@ export default async function DashboardPage() {
 
   const companyId = companyUser?.company_id
 
-  // Aggregate stats
-  const { data: evaluations } = await supabase
-    .from('evaluations')
-    .select('id, readiness_band, readiness_score, risk_flags, department')
+  // Aggregate stats from assessments table (not evaluations)
+  const { data: assessments } = await supabase
+    .from('assessments')
+    .select('id, readiness_band, overall_score, risk_flags')
     .eq('company_id', companyId)
     .eq('status', 'complete')
 
-  const total     = evaluations?.length ?? 0
-  const avgScore  = total ? Math.round((evaluations!.reduce((s, e) => s + (e.readiness_score ?? 0), 0)) / total) : 0
-  const highLev   = evaluations?.filter(e => e.readiness_band === 'high_leverage').length ?? 0
-  const riskCount = evaluations?.reduce((sum, e) => sum + ((e.risk_flags as any[])?.filter(f => f.severity === 'high').length ?? 0), 0) ?? 0
+  const total     = assessments?.length ?? 0
+  const avgScore  = total ? Math.round((assessments!.reduce((s, e) => s + (e.overall_score ?? 0), 0)) / total) : 0
+  const highLev   = assessments?.filter(e => e.readiness_band === 'high_leverage').length ?? 0
+  const riskCount = assessments?.reduce((sum, e) => sum + ((e.risk_flags as any[])?.filter(f => f.severity === 'high').length ?? 0), 0) ?? 0
 
   // Band distribution
   const bandCounts = ['not_ready','emerging','capable','strong','high_leverage'].map(band => ({
     band: band.replace('_', ' '),
-    count: evaluations?.filter(e => e.readiness_band === band).length ?? 0,
+    count: assessments?.filter(e => e.readiness_band === band).length ?? 0,
   }))
 
   return (
@@ -41,7 +41,7 @@ export default async function DashboardPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">Overview</h1>
           <div className="flex items-center gap-3">
-            <ExportCSVButton data={evaluations ?? []} filename="workforce-readiness" />
+            <ExportCSVButton data={assessments ?? []} filename="workforce-readiness" />
           </div>
         </div>
 
