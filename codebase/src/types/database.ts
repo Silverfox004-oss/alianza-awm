@@ -75,7 +75,6 @@ export interface Database {
           company_id: string | null
           company_user_id: string | null
           link_id: string | null
-          employee_id: string | null
           status: string
           selected_scenario_ids: string[]
           scenario_ids: string[]
@@ -241,6 +240,8 @@ export interface Database {
         Returns: boolean
       }
     }
-    Enums: Record<string, never>
+    Enums: {
+      assessment_status: 'not_started' | 'in_progress' | 'paused' | 'grading' | 'complete' | 'failed'
+    }
   }
 }

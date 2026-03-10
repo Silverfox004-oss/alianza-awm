@@ -62,7 +62,6 @@ export interface Assessment {
   company_id: string
   company_user_id: string | null
   link_id: string | null
-  employee_id?: string
   status: AssessmentStatus
   selected_scenario_ids: string[]
   current_scenario_index: number
