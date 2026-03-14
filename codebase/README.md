@@ -1,6 +1,6 @@
 # AI Workforce Map
 
-A Next.js 15 application for assessing employee AI readiness across an organization. Employees complete scenario-based assessments; a multi-LLM grading pipeline scores them across 5 domains; employers view results through an analytics dashboard.
+A Next.js 15 application for assessing employee AI readiness across an organization. Employees complete scenario-based assessments; a multi-LLM grading pipeline scores them across 7 domains; employers view results through an analytics dashboard.
 
 ---
 
@@ -63,7 +63,7 @@ src/
 │   ├── auth/
 │   │   └── auth-guard.tsx          # Client-side admin route protection HOC
 │   ├── charts/
-│   │   ├── domain-radar-chart.tsx  # 5-domain radar (Recharts)
+│   │   ├── domain-radar-chart.tsx  # 7-domain radar (Recharts)
 │   │   ├── readiness-distribution-chart.tsx  # Band bar chart
 │   │   ├── risk-concentration-chart.tsx      # Stacked bar by dept
 │   │   └── role-fit-heatmap.tsx    # Nivo heatmap
@@ -117,7 +117,7 @@ supabase/
 ```bash
 git clone <repo-url>
 cd ai-workforce-map
-pnpm install
+npm install
 ```
 
 ### 2. Set up environment variables
@@ -141,23 +141,23 @@ Open the Supabase SQL Editor (Dashboard > SQL Editor) and run the full contents 
 After running the migration, generate TypeScript types:
 
 ```bash
-pnpm db:types
+npm run db:types
 ```
 
 ### 4. Initialize shadcn/ui
 
 ```bash
-pnpm dlx shadcn@latest init
+npx shadcn@latest init
 # Style: Default, Base color: Slate, CSS variables: Yes
 
-pnpm dlx shadcn@latest add button card input label select textarea table form dialog sheet tabs badge separator chart tooltip avatar dropdown-menu progress skeleton alert switch radio-group checkbox slider scroll-area accordion
+npx shadcn@latest add button card input label select textarea table form dialog sheet tabs badge separator chart tooltip avatar dropdown-menu progress skeleton alert switch radio-group checkbox slider scroll-area accordion
 ```
 
 ### 5. Start development
 
 ```bash
 # Terminal 1: Next.js
-pnpm dev
+npm run dev
 
 # Terminal 2: Inngest dev server (for background job debugging)
 npx inngest-cli@latest dev
@@ -193,13 +193,13 @@ The `grade-assessment` Inngest function (`assessment/grade.requested`) runs 6 st
 | Step | Description |
 |---|---|
 | `load-assessment-data` | Fetch responses, scenarios, rubrics from Supabase |
-| `primary-grading` | GPT-4o scores each response across 5 domains (0–4 scale) |
+| `primary-grading` | GPT-4o scores each response across 7 domains (0–4 scale) |
 | `skeptic-grading` | GPT-4o audits each primary score (AGREE / ADJUST_DOWN / FLAG) |
 | `reconcile-scores` | Gap 0–1 → use primary; Gap 2+ → use min(primary, skeptic) |
 | `synthesize` | GPT-4o generates readiness band, role fit, training track, summary |
 | `persist-results` | Write to `evaluations` + `role_fit_results`; set assessment status = `complete` |
 
-**Domain keys (5):** `promptComprehension`, `aiCollaboration`, `criticalEvaluation`, `ethicsAndBias`, `practicalApplication`
+**Domain keys (7):** `task_framing`, `process_thinking`, `verification_instinct`, `exception_handling`, `risk_judgment`, `operational_consistency`, `change_leverage`
 
 **Readiness bands:** `not_ready` → `emerging` → `capable` → `strong` → `high_leverage`
 
@@ -276,8 +276,8 @@ await dispatchGrading(assessmentId)
 | `company_users` | Admin/member membership + employee profile data |
 | `assessment_links` | Shareable link slugs with optional dept/expiry/max-uses |
 | `assessments` | Active and completed assessments |
-| `responses` | Individual scenario responses with follow-up chat |
-| `evaluations` | Graded results per assessment (readiness, training track, risk flags) |
+| `assessment_responses` | Individual scenario responses with follow-up chat |
+| `assessment_evaluations` | Per-scenario 7-domain grading results |
 | `role_fit_results` | Per-role scores (5 rows per evaluation) |
 | `scenarios` | Scenario content (.md source of truth, but also stored in DB) |
 | `rubrics` | Grading rubrics per scenario/domain |
@@ -290,7 +290,7 @@ All tables have RLS enabled. Helper functions `get_user_company_id()` and `is_co
 ## Deployment (Vercel)
 
 ```bash
-pnpm add -g vercel
+npm install -g vercel
 vercel link
 vercel env add NEXT_PUBLIC_SUPABASE_URL
 vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -312,9 +312,9 @@ After deploying, configure Inngest:
 
 ## Pre-launch Checklist
 
-- [ ] `pnpm dev` starts without TypeScript errors
+- [ ] `npm run dev` starts without TypeScript errors
 - [ ] `supabase/migration.sql` runs cleanly in Supabase SQL Editor
-- [ ] `pnpm db:types` generates `src/types/database.ts` successfully
+- [ ] `npm run db:types` generates `src/types/database.ts` successfully
 - [ ] shadcn/ui components all install without conflict
 - [ ] Admin can sign up, complete setup, and generate invite links
 - [ ] Employee can take assessment end-to-end (intake → scenarios → results)

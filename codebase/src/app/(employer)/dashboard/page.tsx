@@ -15,7 +15,7 @@ export default async function DashboardPage() {
     .eq('user_id', user!.id)
     .single()
 
-  const companyId = companyUser?.company_id
+  const companyId = companyUser?.company_id ?? ''
 
   // Aggregate stats from assessments table (not evaluations)
   const { data: assessments } = await supabase

@@ -11,7 +11,7 @@ export default async function RiskPage() {
   const { data: assessments } = await supabase
     .from('assessments')
     .select('id, risk_flags, company_users!company_user_id(name, department)')
-    .eq('company_id', companyUser?.company_id)
+    .eq('company_id', companyUser?.company_id ?? '')
     .eq('status', 'complete')
 
   // Build department x severity stacked bar data

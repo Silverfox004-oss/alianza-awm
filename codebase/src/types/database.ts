@@ -1,6 +1,5 @@
-// Auto-generated Supabase types placeholder
-// Run: npx supabase gen types typescript --project-id rpqxsvqxwhzymnujmyun > src/types/database.ts
-// after running the migration SQL in supabase/
+// Supabase database types — hand-maintained to match post-migration-v2 schema.
+// Regenerate with: npx supabase gen types typescript --project-id rpqxsvqxwhzymnujmyun > src/types/database.ts
 
 export type Json =
   | string
@@ -10,7 +9,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       companies: {
@@ -27,8 +26,27 @@ export interface Database {
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['companies']['Row'], 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Database['public']['Tables']['companies']['Insert']>
+        Relationships: []
+        Insert: {
+          name: string
+          slug: string
+          departments: string[]
+          ai_adoption_goals: string[]
+          risk_sensitivity: 'low' | 'medium' | 'high'
+          target_functions: string[]
+          expected_employee_count?: number | null
+          created_by?: string | null
+        }
+        Update: {
+          name?: string
+          slug?: string
+          departments?: string[]
+          ai_adoption_goals?: string[]
+          risk_sensitivity?: 'low' | 'medium' | 'high'
+          target_functions?: string[]
+          expected_employee_count?: number | null
+          created_by?: string | null
+        }
       }
       company_users: {
         Row: {
@@ -48,8 +66,35 @@ export interface Database {
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['company_users']['Row'], 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Database['public']['Tables']['company_users']['Insert']>
+        Relationships: []
+        Insert: {
+          company_id: string
+          user_id?: string | null
+          role: 'admin' | 'member' | 'employee'
+          name?: string | null
+          title?: string | null
+          department?: string | null
+          years_experience?: number | null
+          is_manager?: boolean
+          ai_exposure?: 'none' | 'basic' | 'moderate' | 'advanced'
+          ambiguity_confidence?: number | null
+          review_comfort?: number | null
+          current_tools?: string[]
+        }
+        Update: {
+          company_id?: string
+          user_id?: string | null
+          role?: 'admin' | 'member' | 'employee'
+          name?: string | null
+          title?: string | null
+          department?: string | null
+          years_experience?: number | null
+          is_manager?: boolean
+          ai_exposure?: 'none' | 'basic' | 'moderate' | 'advanced'
+          ambiguity_confidence?: number | null
+          review_comfort?: number | null
+          current_tools?: string[]
+        }
       }
       assessment_links: {
         Row: {
@@ -66,8 +111,31 @@ export interface Database {
           used_at: string | null
           assessment_id: string | null
         }
-        Insert: Omit<Database['public']['Tables']['assessment_links']['Row'], 'id' | 'created_at'>
-        Update: Partial<Database['public']['Tables']['assessment_links']['Insert']>
+        Relationships: []
+        Insert: {
+          company_id: string
+          slug: string
+          department?: string | null
+          max_uses?: number | null
+          use_count?: number
+          expires_at?: string | null
+          is_active?: boolean
+          created_by?: string | null
+          used_at?: string | null
+          assessment_id?: string | null
+        }
+        Update: {
+          company_id?: string
+          slug?: string
+          department?: string | null
+          max_uses?: number | null
+          use_count?: number
+          expires_at?: string | null
+          is_active?: boolean
+          created_by?: string | null
+          used_at?: string | null
+          assessment_id?: string | null
+        }
       }
       assessments: {
         Row: {
@@ -77,13 +145,11 @@ export interface Database {
           link_id: string | null
           status: string
           selected_scenario_ids: string[]
-          scenario_ids: string[]
           current_scenario_index: number
           started_at: string | null
           completed_at: string | null
           paused_at: string | null
           elapsed_seconds: number | null
-          total_time_seconds: number | null
           overall_score: number | null
           readiness_band: string | null
           domain_scores: Json | null
@@ -96,12 +162,58 @@ export interface Database {
           upskill_recommendations: string[] | null
           executive_summary: string | null
           graded_at: string | null
-          link_slug: string | null
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['assessments']['Row'], 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Database['public']['Tables']['assessments']['Insert']>
+        Relationships: []
+        Insert: {
+          company_id?: string | null
+          company_user_id?: string | null
+          link_id?: string | null
+          status?: string
+          selected_scenario_ids?: string[]
+          current_scenario_index?: number
+          started_at?: string | null
+          completed_at?: string | null
+          paused_at?: string | null
+          elapsed_seconds?: number | null
+          overall_score?: number | null
+          readiness_band?: string | null
+          domain_scores?: Json | null
+          role_scores?: Json | null
+          recommended_role?: string | null
+          role_ranking?: string[] | null
+          risk_flags?: Json | null
+          training_track?: string | null
+          deployment_recommendation?: string | null
+          upskill_recommendations?: string[] | null
+          executive_summary?: string | null
+          graded_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          company_user_id?: string | null
+          link_id?: string | null
+          status?: string
+          selected_scenario_ids?: string[]
+          current_scenario_index?: number
+          started_at?: string | null
+          completed_at?: string | null
+          paused_at?: string | null
+          elapsed_seconds?: number | null
+          overall_score?: number | null
+          readiness_band?: string | null
+          domain_scores?: Json | null
+          role_scores?: Json | null
+          recommended_role?: string | null
+          role_ranking?: string[] | null
+          risk_flags?: Json | null
+          training_track?: string | null
+          deployment_recommendation?: string | null
+          upskill_recommendations?: string[] | null
+          executive_summary?: string | null
+          graded_at?: string | null
+        }
       }
       assessment_responses: {
         Row: {
@@ -114,8 +226,23 @@ export interface Database {
           updated_at: string
           created_at: string
         }
-        Insert: Omit<Database['public']['Tables']['assessment_responses']['Row'], 'id' | 'created_at'>
-        Update: Partial<Database['public']['Tables']['assessment_responses']['Insert']>
+        Relationships: []
+        Insert: {
+          assessment_id: string
+          scenario_id: string
+          response_text?: string | null
+          followup_exchanges?: Json | null
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assessment_id?: string
+          scenario_id?: string
+          response_text?: string | null
+          followup_exchanges?: Json | null
+          submitted_at?: string | null
+          updated_at?: string
+        }
       }
       assessment_evaluations: {
         Row: {
@@ -134,8 +261,35 @@ export interface Database {
           skeptic_grade: Json | null
           created_at: string
         }
-        Insert: Omit<Database['public']['Tables']['assessment_evaluations']['Row'], 'id' | 'created_at'>
-        Update: Partial<Database['public']['Tables']['assessment_evaluations']['Insert']>
+        Relationships: []
+        Insert: {
+          assessment_id: string
+          scenario_id: string
+          task_framing?: number | null
+          process_thinking?: number | null
+          verification_instinct?: number | null
+          exception_handling?: number | null
+          risk_judgment?: number | null
+          operational_consistency?: number | null
+          change_leverage?: number | null
+          missed_penalty_applied?: boolean
+          primary_grade?: Json | null
+          skeptic_grade?: Json | null
+        }
+        Update: {
+          assessment_id?: string
+          scenario_id?: string
+          task_framing?: number | null
+          process_thinking?: number | null
+          verification_instinct?: number | null
+          exception_handling?: number | null
+          risk_judgment?: number | null
+          operational_consistency?: number | null
+          change_leverage?: number | null
+          missed_penalty_applied?: boolean
+          primary_grade?: Json | null
+          skeptic_grade?: Json | null
+        }
       }
       role_fit_results: {
         Row: {
@@ -147,8 +301,21 @@ export interface Database {
           is_recommended: boolean
           created_at: string
         }
-        Insert: Omit<Database['public']['Tables']['role_fit_results']['Row'], 'id' | 'created_at'>
-        Update: Partial<Database['public']['Tables']['role_fit_results']['Insert']>
+        Relationships: []
+        Insert: {
+          assessment_id: string
+          role_key: string
+          fit_score: number
+          rank: number
+          is_recommended?: boolean
+        }
+        Update: {
+          assessment_id?: string
+          role_key?: string
+          fit_score?: number
+          rank?: number
+          is_recommended?: boolean
+        }
       }
       scenarios: {
         Row: {
@@ -167,8 +334,33 @@ export interface Database {
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['scenarios']['Row'], 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Database['public']['Tables']['scenarios']['Insert']>
+        Relationships: []
+        Insert: {
+          slug: string
+          title: string
+          archetype: string
+          module: string
+          difficulty: 'obvious' | 'mixed' | 'deceptive'
+          primary_domains: string[]
+          secondary_domains: string[]
+          target_roles: string[]
+          industry?: string | null
+          scenario_text: string
+          status?: 'draft' | 'published' | 'archived'
+        }
+        Update: {
+          slug?: string
+          title?: string
+          archetype?: string
+          module?: string
+          difficulty?: 'obvious' | 'mixed' | 'deceptive'
+          primary_domains?: string[]
+          secondary_domains?: string[]
+          target_roles?: string[]
+          industry?: string | null
+          scenario_text?: string
+          status?: 'draft' | 'published' | 'archived'
+        }
       }
       roles: {
         Row: {
@@ -179,43 +371,19 @@ export interface Database {
           domain_weights: Json
           created_at: string
         }
-        Insert: Omit<Database['public']['Tables']['roles']['Row'], 'id' | 'created_at'>
-        Update: Partial<Database['public']['Tables']['roles']['Insert']>
-      }
-      evaluations: {
-        Row: {
-          id: string
-          assessment_id: string | null
-          company_id: string | null
-          employee_name: string | null
-          department: string | null
-          readiness_band: string | null
-          readiness_score: number | null
-          domain_scores: Json
-          risk_flags: Json
-          training_track: string | null
-          deployment_recommendation: string | null
-          upskill_recommendations: string[] | null
-          executive_summary: string | null
-          status: 'complete' | 'failed'
-          created_at: string
-          updated_at: string
+        Relationships: []
+        Insert: {
+          name: string
+          label: string
+          description?: string | null
+          domain_weights: Json
         }
-        Insert: Omit<Database['public']['Tables']['evaluations']['Row'], 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Database['public']['Tables']['evaluations']['Insert']>
-      }
-      responses: {
-        Row: {
-          id: string
-          assessment_id: string
-          scenario_id: string
-          raw_response: string
-          followup_questions: Json
-          time_spent_seconds: number
-          created_at: string
+        Update: {
+          name?: string
+          label?: string
+          description?: string | null
+          domain_weights?: Json
         }
-        Insert: Omit<Database['public']['Tables']['responses']['Row'], 'id' | 'created_at'>
-        Update: Partial<Database['public']['Tables']['responses']['Insert']>
       }
       rubrics: {
         Row: {
@@ -225,8 +393,17 @@ export interface Database {
           rubric_text: string
           created_at: string
         }
-        Insert: Omit<Database['public']['Tables']['rubrics']['Row'], 'id' | 'created_at'>
-        Update: Partial<Database['public']['Tables']['rubrics']['Insert']>
+        Relationships: []
+        Insert: {
+          scenario_id: string
+          domain: string
+          rubric_text: string
+        }
+        Update: {
+          scenario_id?: string
+          domain?: string
+          rubric_text?: string
+        }
       }
     }
     Views: Record<string, never>

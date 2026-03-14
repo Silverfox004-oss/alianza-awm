@@ -12,7 +12,7 @@ export default async function MatrixPage() {
   const { data: roleFits } = await supabase
     .from('role_fit_results')
     .select('role_key, fit_score, assessment_id, assessments!inner(id, company_id, company_users!company_user_id(name))')
-    .eq('assessments.company_id', companyUser?.company_id)
+    .eq('assessments.company_id', companyUser?.company_id ?? '')
 
   // Build Nivo heatmap data: array of { id: employeeName, data: [{ x: role, y: score }] }
   const grouped: Record<string, any> = {}

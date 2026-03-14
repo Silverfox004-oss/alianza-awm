@@ -16,7 +16,7 @@ export default async function RankingPage() {
       company_users!company_user_id(name, department),
       role_fit_results ( role_key, fit_score )
     `)
-    .eq('company_id', companyUser?.company_id)
+    .eq('company_id', companyUser?.company_id ?? '')
     .eq('status', 'complete')
     .order('overall_score', { ascending: false })
 

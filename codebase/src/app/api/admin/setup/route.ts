@@ -35,10 +35,11 @@ export async function POST(req: Request) {
     .from('companies')
     .insert({
       name: company_name.trim(),
+      slug: company_name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
       departments,
-      ai_adoption_goals,
-      risk_sensitivity,
-      target_functions,
+      ai_adoption_goals: ai_adoption_goals ?? [],
+      risk_sensitivity: risk_sensitivity ?? 'medium',
+      target_functions: target_functions ?? [],
       expected_employee_count,
       created_by: user.id,
     })

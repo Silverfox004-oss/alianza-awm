@@ -181,7 +181,7 @@ export default function SetupPage() {
             <CardContent>
               <RadioGroup
                 value={riskSensitivity}
-                onValueChange={(v: 'low' | 'medium' | 'high') => setRiskSensitivity(v)}
+                onValueChange={(v) => setRiskSensitivity(v as 'low' | 'medium' | 'high')}
                 className="flex gap-6"
               >
                 {(['low', 'medium', 'high'] as const).map(level => (

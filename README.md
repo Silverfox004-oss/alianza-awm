@@ -33,12 +33,9 @@ Human capability assessment layer for AI adoption. Maps employees into 5 AI-adja
 - **AI Pipeline**: Vercel AI SDK, 5 specialized grading agents
 - **Deployment**: Vercel
 
-## Remaining P0 Items (~2 hrs dev work)
+## Status
 
-1. Rename `responses` table → `assessment_responses` (or update TS references) — 30 min
-2. Create `assessment_evaluations` table — 30 min
-3. Add `/api/assessment/progress` route — 1 hr
-4. Fix `assessment_links.code` vs `slug` column name — 15 min
-5. Align `types/index.ts` with `scoring.ts` exports — 1-2 hrs
+All P0 items (table renames, missing routes, column/type alignment) have been completed.
+Remaining work is documented in `DEV-HANDOFF.md`.
 
 See `codebase/README.md` for full setup instructions.

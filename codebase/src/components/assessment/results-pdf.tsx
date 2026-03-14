@@ -125,7 +125,8 @@ export function ResultsPDFDownload({
       document={<ResultsDocument assessment={assessment} roleFitResults={roleFitResults} domainScores={domainScores} />}
       fileName={`ai-readiness-results-${assessment.id}.pdf`}
     >
-      {({ loading }) => (
+      {/* @ts-expect-error — PDFDownloadLink render prop typing mismatch with @react-pdf/renderer v3 */}
+      {({ loading }: { loading: boolean }) => (
         <Button variant="outline" disabled={loading}>
           <Download className="w-4 h-4 mr-2" />
           {loading ? 'Preparing PDF...' : 'Download Report'}

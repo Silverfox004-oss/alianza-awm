@@ -46,7 +46,7 @@ export default async function TrainingPage() {
   const { data: assessments } = await supabase
     .from('assessments')
     .select('id, training_track, overall_score, company_users!company_user_id(name, department)')
-    .eq('company_id', companyUser?.company_id)
+    .eq('company_id', companyUser?.company_id ?? '')
     .eq('status', 'complete')
 
   const byTrack: Record<string, any[]> = { A: [], B: [], C: [], D: [] }

@@ -26,11 +26,8 @@ export default async function AssessmentPage({ searchParams }: AssessmentPagePro
 
   if (error || !assessment) notFound();
 
-  const { data: scenarios } = await supabase
-    .from("scenarios")
-    .select("id, title, module_label, context, task, time_limit_seconds")
-    .in("id", assessment.selected_scenario_ids)
-    .order("module_label");
+  const { loadScenarioFiles } = await import("@/lib/utils/scenario-loader");
+  const scenarioFiles = await loadScenarioFiles(assessment.selected_scenario_ids);
 
   const { data: responses } = await supabase
     .from("assessment_responses")
@@ -38,8 +35,16 @@ export default async function AssessmentPage({ searchParams }: AssessmentPagePro
     .eq("assessment_id", id);
 
   const orderedScenarios = assessment.selected_scenario_ids
-    .map((sid: string) => scenarios?.find((s) => s.id === sid))
-    .filter(Boolean) as Scenario[];
+    .map((sid: string) => scenarioFiles.find((s) => s.id === sid))
+    .filter(Boolean)
+    .map((s) => ({
+      id: s!.id,
+      title: s!.title,
+      module_label: s!.moduleLabel,
+      context: s!.context,
+      task: s!.task,
+      time_limit_seconds: s!.timeLimitSeconds,
+    })) as Scenario[];
 
   return (
     <AssessmentContainer
